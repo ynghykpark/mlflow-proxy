@@ -51,7 +51,7 @@ services:
           --host 0.0.0.0
           --port 5000
           --serve-artifacts
-          --backend-store-uri postgresql://admin:cresprit0101@postgres:5432/db
+          --backend-store-uri postgresql://admin:cresprit-admin@postgres:5432/db
           --artifacts-destination s3://mlflow
 
   mlflow-bucket-client:
