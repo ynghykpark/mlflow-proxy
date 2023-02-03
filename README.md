@@ -1,4 +1,4 @@
-# aloohai-webservices
+# mlflow-proxy
 
 ## How to run
 First, create .htpasswd files for basic authentication.

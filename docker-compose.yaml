@@ -8,9 +8,8 @@ services:
       - "9000"
       - "9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL}
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin012345
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -29,9 +28,9 @@ services:
     expose:
       - "5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: cresprit-admin
 
   mlflow:
     container_name: mlflow
@@ -45,15 +44,15 @@ services:
       - minio
     environment:
       MLFLOW_S3_ENDPOINT_URL: http://minio:9000
-      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: admin012345
     command: >
-      mlflow server
-      --host 0.0.0.0
-      --port 5000
-      --serve-artifacts
-      --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      --artifacts-destination s3://${MLFLOW_BUCKET_NAME}
+        mlflow server
+          --host 0.0.0.0
+          --port 5000
+          --serve-artifacts
+          --backend-store-uri postgresql://admin:cresprit0101@postgres:5432/db
+          --artifacts-destination s3://mlflow
 
   mlflow-bucket-client:
     image: minio/mc
@@ -64,9 +63,9 @@ services:
     tty: true
     entrypoint: >
       bash -c "
-      mc alias set minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
-      if ! mc ls minio | grep --quiet ${MLFLOW_BUCKET_NAME}; then
-        mc mb minio/${MLFLOW_BUCKET_NAME}
+      mc alias set minio http://minio:9000 admin admin012345 &&
+      if ! mc ls minio | grep --quiet mlflow; then
+        mc mb minio/mlflow
       else
         echo 'bucket already exists'
       fi
@@ -78,6 +77,5 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./.htpasswd:/etc/apache2/.htpasswd
-      - ./static:/usr/share/nginx/html/
     ports:
      - "${PORT}:80"
